@@ -2,6 +2,11 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import useField from "../hooks"
 
+const removeReset = (field) => {
+    const { reset, ...result } = { ...field }
+    return result
+}
+
 const CreateNew = ({ addNew, setNotification }) => {
     const navigate = useNavigate()
     const content = useField("text", "content")
@@ -24,23 +29,24 @@ const CreateNew = ({ addNew, setNotification }) => {
         }, 5000)
     }
 
-    const { reset, spreadContent } = { ...content }
-    console.log(spreadContent)
+    const newContent = removeReset(content)
+    const newAuthor = removeReset(author)
+    const newInfo = removeReset(info)
     return (
         <div>
             <h2>create a new anecdote</h2>
             <form onSubmit={handleSubmit}>
                 <div>
                     content
-                    <input {...spreadContent} />
+                    <input {...newContent} />
                 </div>
                 <div>
                     author
-                    <input {...author} />
+                    <input {...newAuthor} />
                 </div>
                 <div>
                     url for more info
-                    <input {...info} />
+                    <input {...newInfo} />
                 </div>
                 <button type="submit">create</button>
                 <button type="button" onClick={() => {
