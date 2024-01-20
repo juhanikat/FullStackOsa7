@@ -4,7 +4,7 @@ const dummy = (_blogs) => {
 
 const totalLikes = (blogs) => {
   var total = 0
-  blogs.forEach(blog => {
+  blogs.forEach((blog) => {
     var likes = blog.likes
     total = total + likes
   })
@@ -16,7 +16,7 @@ const favoriteBlog = (blogs) => {
     return {}
   }
   var mostLikedBlog = blogs[0]
-  blogs.forEach(blog => {
+  blogs.forEach((blog) => {
     var likes = blog.likes
     if (likes > mostLikedBlog.likes || 0) {
       mostLikedBlog = blog
@@ -27,14 +27,14 @@ const favoriteBlog = (blogs) => {
 
 const mostLikes = (blogs) => {
   const authors = {}
-  blogs.forEach(blog => {
-    if (!(authors[blog.author])) {
+  blogs.forEach((blog) => {
+    if (!authors[blog.author]) {
       authors[blog.author] = 0
     }
     authors[blog.author] += blog.likes
   })
   let mostLiked = Object.keys(authors)[0]
-  Object.keys(authors).forEach(author => {
+  Object.keys(authors).forEach((author) => {
     if (authors[author] > authors[mostLiked]) {
       mostLiked = author
     }
