@@ -8,12 +8,13 @@ import Error from "./components/Error"
 import LoginForm from "./components/Login"
 import CreateBlogForm from "./components/CreateBlog"
 import { setNotification } from "./reducers/notificationReducer"
-import { useDispatch } from "react-redux"
-import { addBlog } from "./reducers/blogsReducer"
+import { useDispatch, useSelector } from "react-redux"
+import { addBlog, initializeBlogs } from "./reducers/blogsReducer"
 
 const App = () => {
   const dispatch = useDispatch()
-  const [blogs, setBlogs] = useState([])
+  const blogs = useSelector((state) => state.blogs)
+
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -22,15 +23,6 @@ const App = () => {
   const [createBlogVisible, setCreateBlogVisible] = useState(false)
   const hideWhenVisible = { display: createBlogVisible ? "none" : "" }
   const showWhenVisible = { display: createBlogVisible ? "" : "none" }
-
-  const fetchBlogs = async () => {
-    const response = await blogService.getAll()
-    setBlogs(response)
-  }
-
-  useEffect(() => {
-    fetchBlogs()
-  }, [])
 
   useEffect(() => {
     const checkLoggedInUser = async () => {
@@ -45,6 +37,10 @@ const App = () => {
 
     checkLoggedInUser()
   }, [])
+
+  useEffect(() => {
+    dispatch(initializeBlogs())
+  })
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -78,27 +74,16 @@ const App = () => {
     }
   }
 
-  const createBlog = async (title, author, url) => {
-    try {
-      await blogService.createBlog({ title, author, url })
-      fetchBlogs()
-      setNotificationMessage(`Added blog ${title} by ${author}`)
-      setTimeout(() => {
-        setNotificationMessage(null)
-      }, 5000)
-    } catch (exception) {
-      setErrorMessage(exception.response.data.error)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-    }
+  const createBlog = (title, author, url) => {
+    dispatch(addBlog({ title, author, url }))
+    dispatch(setNotification(`Added blog ${title} by ${author}`))
   }
 
   const likeBlog = async (blog) => {
     blog.likes += 1
     try {
       await blogService.updateBlog(blog)
-      fetchBlogs()
+      //fetchBlogs()
       dispatch(setNotification(`Liked blog ${blog.title} by ${blog.author}`))
     } catch (exception) {
       console.log(exception)
@@ -112,7 +97,7 @@ const App = () => {
   const removeBlog = async (blog) => {
     try {
       await blogService.removeBlog(blog)
-      fetchBlogs()
+      //fetchBlogs()
       dispatch(setNotification(`Removed blog ${blog.title} by ${blog.author}`))
     } catch (exception) {
       console.log(exception)

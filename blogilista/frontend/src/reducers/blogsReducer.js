@@ -6,9 +6,7 @@ const blogsSlice = createSlice({
   initialState: [],
   reducers: {
     createBlog(state, action) {
-      const newBlog = action.payload
-      blogService.createBlog(newBlog)
-      state.push(newBlog)
+      state.push(action.payload)
     },
     setBlogs(state, action) {
       return action.payload
@@ -16,11 +14,18 @@ const blogsSlice = createSlice({
   }
 })
 
+export const initializeBlogs = () => {
+  return async (dispatch) => {
+    const blogs = await blogService.getAll()
+    dispatch(setBlogs(blogs))
+  }
+}
 export const addBlog = (blog) => {
-  return (dispatch) => {
-    dispatch(createBlog(blog))
+  return async (dispatch) => {
+    const response = await blogService.createBlog(blog)
+    dispatch(createBlog(response.data))
   }
 }
 
-export const { showNotification, hideNotification } = blogsSlice.actions
+export const { createBlog, setBlogs } = blogsSlice.actions
 export default blogsSlice.reducer
