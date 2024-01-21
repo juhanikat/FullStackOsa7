@@ -1,14 +1,15 @@
 import React from "react"
 import { useState, useEffect } from "react"
 import Blog from "./components/Blog"
-import blogService from "./services/blogs"
-import loginService from "./services/login"
+import blogService from "./services/blogService"
+import loginService from "./services/loginService"
 import Notification from "./components/Notification"
 import Error from "./components/Error"
 import LoginForm from "./components/Login"
 import CreateBlogForm from "./components/CreateBlog"
 import { setNotification } from "./reducers/notificationReducer"
 import { useDispatch } from "react-redux"
+import { addBlog } from "./reducers/blogsReducer"
 
 const App = () => {
   const dispatch = useDispatch()
