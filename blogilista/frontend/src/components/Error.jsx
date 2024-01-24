@@ -1,11 +1,13 @@
 import React from "react"
+import notificationReducer, {
+  showNotification
+} from "../reducers/notificationReducer"
+import { useSelector } from "react-redux"
 
 const Error = ({ message }) => {
-  if (message === null) {
-    return null
-  }
+  const error = useSelector((state) => state.error)
 
-  return <div className="error">{message}</div>
+  return <div className="error">{error}</div>
 }
 
 export default Error

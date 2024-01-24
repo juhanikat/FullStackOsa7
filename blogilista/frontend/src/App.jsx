@@ -8,8 +8,14 @@ import Error from "./components/Error"
 import LoginForm from "./components/Login"
 import CreateBlogForm from "./components/CreateBlog"
 import { setNotification } from "./reducers/notificationReducer"
+import { setError } from "./reducers/errorReducer"
 import { useDispatch, useSelector } from "react-redux"
-import { addBlog, initializeBlogs } from "./reducers/blogsReducer"
+import {
+  addBlog,
+  initializeBlogs,
+  likeBlog,
+  deleteBlog
+} from "./reducers/blogsReducer"
 
 const App = () => {
   const dispatch = useDispatch()
@@ -40,7 +46,7 @@ const App = () => {
 
   useEffect(() => {
     dispatch(initializeBlogs())
-  })
+  }, [])
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -54,10 +60,8 @@ const App = () => {
       blogService.setToken(user.token)
       dispatch(setNotification(`User ${user.username} logged in`))
     } catch (exception) {
-      setErrorMessage(exception.response.data.error)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      console.log(exception)
+      dispatch(setError(exception.response.data.error))
     }
   }
 
@@ -75,36 +79,32 @@ const App = () => {
   }
 
   const createBlog = (title, author, url) => {
-    dispatch(addBlog({ title, author, url }))
-    dispatch(setNotification(`Added blog ${title} by ${author}`))
-  }
-
-  const likeBlog = async (blog) => {
-    blog.likes += 1
     try {
-      await blogService.updateBlog(blog)
-      //fetchBlogs()
-      dispatch(setNotification(`Liked blog ${blog.title} by ${blog.author}`))
+      dispatch(addBlog({ title, author, url }))
+      dispatch(setNotification(`Added blog ${title} by ${author}`))
     } catch (exception) {
       console.log(exception)
-      setErrorMessage(exception.response.data.error)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      dispatch(setError(exception.response.data.error))
     }
   }
 
-  const removeBlog = async (blog) => {
+  const like = async (blog) => {
     try {
-      await blogService.removeBlog(blog)
-      //fetchBlogs()
+      dispatch(likeBlog(blog))
+      dispatch(setNotification(`Liked blog ${blog.title} by ${blog.author}`))
+    } catch (exception) {
+      console.log(exception)
+      dispatch(setError(exception.response.data.error))
+    }
+  }
+
+  const remove = async (blog) => {
+    try {
+      dispatch(deleteBlog(blog))
       dispatch(setNotification(`Removed blog ${blog.title} by ${blog.author}`))
     } catch (exception) {
       console.log(exception)
-      setErrorMessage(exception.response.data.error)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      dispatch(setError(exception.response.data.error))
     }
   }
 
@@ -131,8 +131,8 @@ const App = () => {
       <Blog
         key={blog.id}
         blog={blog}
-        likeBlog={likeBlog}
-        removeBlog={removeBlog}
+        likeBlog={like}
+        removeBlog={remove}
         currentUser={user}
       />
     ))
