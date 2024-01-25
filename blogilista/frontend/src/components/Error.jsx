@@ -4,7 +4,7 @@ import notificationReducer, {
 } from "../reducers/notificationReducer"
 import { useSelector } from "react-redux"
 
-const Error = ({ message }) => {
+const Error = () => {
   const error = useSelector((state) => state.error)
 
   return <div className="error">{error}</div>

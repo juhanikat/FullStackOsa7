@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit"
 import blogService from "../services/blogService"
+import { setError } from "./errorReducer"
 
 const blogsSlice = createSlice({
   name: "blogs",
@@ -31,8 +32,13 @@ export const initializeBlogs = () => {
 }
 export const addBlog = (blog) => {
   return async (dispatch) => {
-    const response = await blogService.createBlog(blog)
-    dispatch(createBlog(response.data))
+    try {
+      const response = await blogService.createBlog(blog)
+      dispatch(createBlog(response.data))
+    } catch (exception) {
+      console.log(exception)
+      throw exception
+    }
   }
 }
 
