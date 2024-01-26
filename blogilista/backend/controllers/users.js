@@ -15,17 +15,29 @@ usersRouter.get("/", async (request, response) => {
   response.json(users)
 })
 
+usersRouter.get("/:id", async (request, response) => {
+  try {
+    const user = await User.findById(request.params.id)
+    if (user) {
+      response.json(user)
+    } else {
+      return response.status(400).send({ error: "Invalid id" }).end()
+    }
+  } catch (error) {
+    console.log(error)
+    return response.status(500).end()
+  }
+})
+
 usersRouter.post("/", async (request, response) => {
   const username = request.body.username || false
   const name = request.body.name
   const password = request.body.password || false
 
   if (!(username && password) || username.length < 3 || password.length < 3) {
-    response
-      .status(400)
-      .send({
-        error: "no username or password or username/password length is under 3"
-      })
+    response.status(400).send({
+      error: "no username or password or username/password length is under 3"
+    })
     return
   }
 

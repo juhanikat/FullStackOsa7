@@ -32,13 +32,8 @@ export const initializeBlogs = () => {
 }
 export const addBlog = (blog) => {
   return async (dispatch) => {
-    try {
-      const response = await blogService.createBlog(blog)
-      dispatch(createBlog(response.data))
-    } catch (exception) {
-      console.log(exception)
-      throw exception
-    }
+    const response = await blogService.createBlog(blog)
+    dispatch(createBlog(response.data))
   }
 }
 

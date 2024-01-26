@@ -1,24 +1,29 @@
+import { configureStore } from "@reduxjs/toolkit"
 import React from "react"
 import ReactDOM from "react-dom/client"
-import App from "./App"
-import { configureStore } from "@reduxjs/toolkit"
 import { Provider } from "react-redux"
-import notificationReducer from "./reducers/notificationReducer"
+import { BrowserRouter } from "react-router-dom"
+import App from "./App"
 import blogsReducer from "./reducers/blogsReducer"
 import errorReducer from "./reducers/errorReducer"
-import userReducer from "./reducers/userReducer"
+import loginReducer from "./reducers/loginReducer"
+import notificationReducer from "./reducers/notificationReducer"
+import usersReducer from "./reducers/usersReducer"
 
 const store = configureStore({
   reducer: {
     blogs: blogsReducer,
-    user: userReducer,
+    currentUser: loginReducer,
+    users: usersReducer,
     notification: notificationReducer,
     error: errorReducer
   }
 })
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <Provider store={store}>
-    <App />
-  </Provider>
+  <BrowserRouter>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </BrowserRouter>
 )

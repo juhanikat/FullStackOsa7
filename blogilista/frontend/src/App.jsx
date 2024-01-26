@@ -1,22 +1,23 @@
-import React from "react"
-import { useState, useEffect } from "react"
-import Blog from "./components/Blog"
-import blogService from "./services/blogService"
-import loginService from "./services/loginService"
-import Notification from "./components/Notification"
+import React, { useEffect, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { Route, Routes } from "react-router-dom"
+import BlogList from "./components/BlogList"
+import CreateBlogForm from "./components/CreateBlog"
 import Error from "./components/Error"
 import LoginForm from "./components/Login"
-import CreateBlogForm from "./components/CreateBlog"
-import { setNotification } from "./reducers/notificationReducer"
-import { setError } from "./reducers/errorReducer"
-import { useDispatch, useSelector } from "react-redux"
+import Notification from "./components/Notification"
+import User from "./components/User"
+import UserList from "./components/UserList"
 import {
   addBlog,
+  deleteBlog,
   initializeBlogs,
-  likeBlog,
-  deleteBlog
+  likeBlog
 } from "./reducers/blogsReducer"
-import { login, logout } from "./reducers/userReducer"
+import { setError } from "./reducers/errorReducer"
+import { login, logout } from "./reducers/loginReducer"
+import { setNotification } from "./reducers/notificationReducer"
+import { initializeUsers } from "./reducers/usersReducer"
 
 const App = () => {
   const dispatch = useDispatch()
@@ -29,7 +30,7 @@ const App = () => {
   const hideWhenVisible = { display: createBlogVisible ? "none" : "" }
   const showWhenVisible = { display: createBlogVisible ? "" : "none" }
 
-  const user = useSelector((state) => state.user)
+  const user = useSelector((state) => state.currentUser)
 
   useEffect(() => {
     const checkLoggedInUser = () => {
@@ -38,79 +39,70 @@ const App = () => {
       )
       if (loggedUserJSON !== null) {
         dispatch(login(loggedUserJSON))
-        dispatch(setNotification(`User ${loggedUserJSON.username} logged in`))
       }
+    }
+    const initializeBlogsState = () => {
+      dispatch(initializeBlogs())
+    }
+    const initializeUsersState = () => {
+      dispatch(initializeUsers())
     }
 
     checkLoggedInUser()
+    initializeBlogsState()
+    initializeUsersState()
   }, [])
 
-  useEffect(() => {
-    dispatch(initializeBlogs())
-  }, [])
-
-  const handleLogin = async (event) => {
+  const handleLogin = (event) => {
     event.preventDefault()
-
-    try {
-      dispatch(login({ username, password }))
-      //const user = await loginService.login({ username, password })
-      //setUser(user)
-      //setUsername("")
-      //setPassword("")
-      //blogService.setToken(user.token)
-      //dispatch(setNotification(`User ${user.username} logged in`))
-    } catch (exception) {
-      console.log(exception)
-      if (exception.response !== undefined) {
+    dispatch(login({ username, password }))
+      .then(() => {})
+      .catch((exception) => {
+        console.log(exception.response.data.error)
         dispatch(setError(exception.response.data.error))
-      } else {
-        dispatch(setError("Unknown error!"))
-      }
-    }
+      })
   }
 
-  const handleLogOut = async (event) => {
+  const handleLogOut = (event) => {
     event.preventDefault()
-    if (user) {
-      if (window.localStorage.getItem("loggedBlogappUser")) {
-        window.localStorage.removeItem("loggedBlogappUser")
-        console.log("removed user from local storage")
-        dispatch(logout())
-        dispatch(setNotification("logged out succesfully"))
-      }
-    }
+    dispatch(logout())
+    dispatch(setNotification("logged out succesfully"))
   }
 
-  const createBlog = (title, author, url) => {
+  const handleCreateBlog = (title, author, url) => {
     dispatch(addBlog({ title, author, url }))
       .then(() => {
         dispatch(setNotification(`Added blog ${title} by ${author}`))
       })
       .catch((exception) => {
-        console.log(exception)
+        console.log(exception.response.data.error)
         dispatch(setError(exception.response.data.error))
       })
   }
 
-  const like = async (blog) => {
-    try {
-      dispatch(likeBlog(blog))
-      dispatch(setNotification(`Liked blog ${blog.title} by ${blog.author}`))
-    } catch (exception) {
-      console.log(exception)
-      dispatch(setError(exception.response.data.error))
-    }
+  const handleLikeBlog = async (blog) => {
+    dispatch(likeBlog(blog))
+      .then(() => {
+        dispatch(setNotification(`Liked blog ${blog.title} by ${blog.author}`))
+      })
+      .catch((exception) => {
+        console.log(exception.response.data.error)
+        dispatch(setError(exception.response.data.error))
+      })
   }
 
-  const remove = async (blog) => {
-    try {
-      dispatch(deleteBlog(blog))
-      dispatch(setNotification(`Removed blog ${blog.title} by ${blog.author}`))
-    } catch (exception) {
-      console.log(exception)
-      dispatch(setError(exception.response.data.error))
-    }
+  const handleRemoveBlog = async (blog) => {
+    dispatch(deleteBlog(blog))
+      .then(() => {
+        dispatch(
+          setNotification(`Removed blog ${blog.title} by ${blog.author}`)
+        )
+      })
+
+      .catch((exception) => {
+        console.log(exception.response.data.error)
+        dispatch(setError(exception.response.data.error))
+      })
   }
 
   if (user === null) {
@@ -131,34 +123,42 @@ const App = () => {
       </div>
     )
   }
-  const blogsList = blogs
-    .map((blog) => (
-      <Blog
-        key={blog.id}
-        blog={blog}
-        likeBlog={like}
-        removeBlog={remove}
-        currentUser={user}
-      />
-    ))
-    .sort((a, b) => b.props.blog.likes - a.props.blog.likes)
+
   return (
     <div>
       <Notification />
       <Error />
-      <h2>{user.username} is logged in</h2>
-      <button onClick={handleLogOut}>Log out</button>
-      <div style={hideWhenVisible}>
-        <button onClick={() => setCreateBlogVisible(true)}>Create Blog</button>
+      <div>
+        <h2>{user.username} is logged in</h2>
+        <button onClick={handleLogOut}>Log out</button>
       </div>
-      <div style={showWhenVisible}>
-        <CreateBlogForm createBlog={createBlog} />
-        <button onClick={() => setCreateBlogVisible(false)}>Cancel</button>
-      </div>
-      <div className="blogsDiv">
-        <h2>blogs</h2>
-        {blogsList}
-      </div>
+      <Routes>
+        <Route path="/users" element={<UserList />} />
+        <Route path="/users/:id" element={<User />} />
+        <Route
+          path="/"
+          element={
+            <div>
+              <div style={hideWhenVisible}>
+                <button onClick={() => setCreateBlogVisible(true)}>
+                  Create Blog
+                </button>
+              </div>
+              <div style={showWhenVisible}>
+                <CreateBlogForm createBlog={handleCreateBlog} />
+                <button onClick={() => setCreateBlogVisible(false)}>
+                  Cancel
+                </button>
+              </div>
+              <BlogList
+                handleLikeBlog={handleLikeBlog}
+                handleRemoveBlog={handleRemoveBlog}
+                user={user}
+              />
+            </div>
+          }
+        />
+      </Routes>
     </div>
   )
 }
