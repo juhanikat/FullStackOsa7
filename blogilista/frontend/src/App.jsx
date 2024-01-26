@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, Link, useNavigate } from "react-router-dom"
 import BlogList from "./components/BlogList"
 import CreateBlogForm from "./components/CreateBlog"
 import Error from "./components/Error"
@@ -12,16 +12,18 @@ import {
   addBlog,
   deleteBlog,
   initializeBlogs,
-  likeBlog
+  likeBlog,
+  addComment
 } from "./reducers/blogsReducer"
 import { setError } from "./reducers/errorReducer"
 import { login, logout } from "./reducers/loginReducer"
 import { setNotification } from "./reducers/notificationReducer"
 import { initializeUsers } from "./reducers/usersReducer"
+import Blog from "./components/Blog"
 
 const App = () => {
   const dispatch = useDispatch()
-  const blogs = useSelector((state) => state.blogs)
+  const navigate = useNavigate()
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -30,7 +32,7 @@ const App = () => {
   const hideWhenVisible = { display: createBlogVisible ? "none" : "" }
   const showWhenVisible = { display: createBlogVisible ? "" : "none" }
 
-  const user = useSelector((state) => state.currentUser)
+  const currentUser = useSelector((state) => state.currentUser)
 
   useEffect(() => {
     const checkLoggedInUser = () => {
@@ -97,15 +99,28 @@ const App = () => {
         dispatch(
           setNotification(`Removed blog ${blog.title} by ${blog.author}`)
         )
+        navigate("/")
       })
-
       .catch((exception) => {
         console.log(exception.response.data.error)
         dispatch(setError(exception.response.data.error))
       })
   }
 
-  if (user === null) {
+  const handleAddComment = async (blog, comment) => {
+    dispatch(addComment(blog, comment))
+      .then(() => {
+        dispatch(
+          setNotification(`Added comment to ${blog.title} by ${blog.author}`)
+        )
+      })
+      .catch((exception) => {
+        console.log(exception.response.data.error)
+        dispatch(setError(exception.response.data.error))
+      })
+  }
+
+  if (currentUser === null) {
     return (
       <div>
         <Notification />
@@ -126,13 +141,40 @@ const App = () => {
 
   return (
     <div>
+      <div>
+        <Link to="/">Home</Link>
+        <Link to="/blogs">Blogs</Link>
+        <Link to="/users">Users</Link>
+      </div>
       <Notification />
       <Error />
       <div>
-        <h2>{user.username} is logged in</h2>
+        <h1>Blog App</h1>
+        <h2>{currentUser.username} is logged in</h2>
         <button onClick={handleLogOut}>Log out</button>
       </div>
       <Routes>
+        <Route
+          path="/blogs"
+          element={
+            <BlogList
+              handleLikeBlog={handleLikeBlog}
+              handleRemoveBlog={handleRemoveBlog}
+              currentUser={currentUser}
+            />
+          }
+        />
+        <Route
+          path="/blogs/:id"
+          element={
+            <Blog
+              likeBlog={handleLikeBlog}
+              removeBlog={handleRemoveBlog}
+              addComment={handleAddComment}
+              currentUser={currentUser}
+            />
+          }
+        />
         <Route path="/users" element={<UserList />} />
         <Route path="/users/:id" element={<User />} />
         <Route
@@ -153,7 +195,7 @@ const App = () => {
               <BlogList
                 handleLikeBlog={handleLikeBlog}
                 handleRemoveBlog={handleRemoveBlog}
-                user={user}
+                currentUser={currentUser}
               />
             </div>
           }

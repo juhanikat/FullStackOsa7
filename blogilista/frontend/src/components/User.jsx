@@ -5,8 +5,8 @@ import { Link } from "react-router-dom"
 
 const User = ({ user }) => {
   const id = useParams().id
-  const users = useSelector((state) => state.users)
   if (id) {
+    const users = useSelector((state) => state.users)
     const detailedUser = users.find((user) => user.id === id)
     if (!detailedUser) {
       return null
