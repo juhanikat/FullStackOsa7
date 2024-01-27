@@ -31,6 +31,18 @@ blogsRouter.post("/", async (request, response) => {
   return response.status(201).json(result)
 })
 
+blogsRouter.post("/:id/comments", async (request, response) => {
+  const blog = await Blog.findById(request.params.id)
+  if (!request.body.comment) {
+    return response
+      .status(400)
+      .json({ error: "no comment field in request body" })
+  }
+  blog.comments = blog.comments.concat(request.body.comment)
+  const result = await blog.save()
+  return response.status(201).json(result)
+})
+
 blogsRouter.put("/:id", async (request, response) => {
   try {
     const newBlog = request.body

@@ -1,5 +1,4 @@
 import { useSelector } from "react-redux"
-import PropTypes from "prop-types"
 import React from "react"
 import { useParams } from "react-router-dom"
 import { Link } from "react-router-dom"
@@ -32,9 +31,12 @@ const Blog = ({ blog, likeBlog, removeBlog, addComment, currentUser }) => {
     }
 
     return (
-      <div>
-        <h2>{detailedBlog.title}</h2>
-        {detailedBlog.url}
+      <div className="detailedBlog">
+        <h2>
+          {detailedBlog.title} by {detailedBlog.author}
+        </h2>
+        <a href={detailedBlog.url}>{detailedBlog.url}</a>
+        <br></br>
         {detailedBlog.likes} likes
         <button onClick={() => likeBlog(detailedBlog)}>Like</button>
         <br></br>

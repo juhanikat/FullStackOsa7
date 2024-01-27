@@ -4,7 +4,7 @@ import { Route, Routes, Link, useNavigate } from "react-router-dom"
 import BlogList from "./components/BlogList"
 import CreateBlogForm from "./components/CreateBlog"
 import Error from "./components/Error"
-import LoginForm from "./components/Login"
+import LoginForm from "./components/LoginForm"
 import Notification from "./components/Notification"
 import User from "./components/User"
 import UserList from "./components/UserList"
@@ -20,13 +20,11 @@ import { login, logout } from "./reducers/loginReducer"
 import { setNotification } from "./reducers/notificationReducer"
 import { initializeUsers } from "./reducers/usersReducer"
 import Blog from "./components/Blog"
+import NavigationBar from "./components/NavigationBar"
 
 const App = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
 
   const [createBlogVisible, setCreateBlogVisible] = useState(false)
   const hideWhenVisible = { display: createBlogVisible ? "none" : "" }
@@ -57,8 +55,14 @@ const App = () => {
 
   const handleLogin = (event) => {
     event.preventDefault()
+    const username = event.target.username.value
+    event.target.username.value = ""
+    const password = event.target.password.value
+    event.target.password.value = ""
     dispatch(login({ username, password }))
-      .then(() => {})
+      .then(() => {
+        dispatch(setNotification("Logged in succesfully"))
+      })
       .catch((exception) => {
         console.log(exception.response.data.error)
         dispatch(setError(exception.response.data.error))
@@ -122,48 +126,28 @@ const App = () => {
 
   if (currentUser === null) {
     return (
-      <div>
+      <div className="container">
         <Notification />
         <Error />
         <div>
           <h2>Log in to application</h2>
-          <LoginForm
-            onSubmit={handleLogin}
-            username={username}
-            password={password}
-            setUsername={setUsername}
-            setPassword={setPassword}
-          />
+          <LoginForm onSubmit={handleLogin} />
         </div>
       </div>
     )
   }
 
   return (
-    <div>
-      <div>
-        <Link to="/">Home</Link>
-        <Link to="/blogs">Blogs</Link>
-        <Link to="/users">Users</Link>
-      </div>
+    <div className="container">
+      <NavigationBar currentUser={currentUser} />
       <Notification />
       <Error />
       <div>
         <h1>Blog App</h1>
-        <h2>{currentUser.username} is logged in</h2>
         <button onClick={handleLogOut}>Log out</button>
       </div>
       <Routes>
-        <Route
-          path="/blogs"
-          element={
-            <BlogList
-              handleLikeBlog={handleLikeBlog}
-              handleRemoveBlog={handleRemoveBlog}
-              currentUser={currentUser}
-            />
-          }
-        />
+        <Route path="/blogs" element={<BlogList />} />
         <Route
           path="/blogs/:id"
           element={
@@ -192,11 +176,7 @@ const App = () => {
                   Cancel
                 </button>
               </div>
-              <BlogList
-                handleLikeBlog={handleLikeBlog}
-                handleRemoveBlog={handleRemoveBlog}
-                currentUser={currentUser}
-              />
+              <BlogList />
             </div>
           }
         />
