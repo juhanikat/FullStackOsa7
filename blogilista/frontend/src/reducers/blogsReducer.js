@@ -2,6 +2,10 @@ import { createSlice } from "@reduxjs/toolkit"
 import blogService from "../services/blogService"
 import { initializeUsers } from "./usersReducer"
 
+const createId = () => {
+  return Math.floor(Math.random() * 1000000)
+}
+
 const blogsSlice = createSlice({
   name: "blogs",
   initialState: [],
@@ -49,13 +53,17 @@ export const likeBlog = (blog) => {
 export const deleteBlog = (blog) => {
   return async (dispatch) => {
     await blogService.removeBlog(blog)
+    await userService.removeBlogfromUser(blog)
     dispatch(removeBlog(blog))
   }
 }
 
 export const addComment = (blog, comment) => {
   return async (dispatch) => {
-    const updatedBlog = { ...blog, comments: blog.comments.concat(comment) }
+    const updatedBlog = {
+      ...blog,
+      comments: blog.comments.concat({ id: createId(), text: comment })
+    }
     await blogService.updateBlog(updatedBlog)
     dispatch(updateBlog(updatedBlog))
   }

@@ -2,6 +2,7 @@ import { useSelector } from "react-redux"
 import React from "react"
 import { useParams } from "react-router-dom"
 import { Link } from "react-router-dom"
+import { Button } from "react-bootstrap"
 
 const Blog = ({ blog, likeBlog, removeBlog, addComment, currentUser }) => {
   const blogStyle = {
@@ -47,13 +48,13 @@ const Blog = ({ blog, likeBlog, removeBlog, addComment, currentUser }) => {
         <h3>comments</h3>
         <ul>
           {detailedBlog.comments.map((comment) => (
-            <li key={comment}>{comment}</li>
+            <li key={comment.id}>{comment.text}</li>
           ))}
         </ul>
         <div>
           <form onSubmit={handleSubmit}>
             <input type="text" name="newComment"></input>
-            <button type="submit">Add comment</button>
+            <Button type="submit">Add comment</Button>
           </form>
         </div>
       </div>

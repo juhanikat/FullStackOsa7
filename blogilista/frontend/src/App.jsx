@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { Route, Routes, Link, useNavigate } from "react-router-dom"
 import BlogList from "./components/BlogList"
-import CreateBlogForm from "./components/CreateBlog"
+import CreateBlogForm from "./components/CreateBlogForm"
 import Error from "./components/Error"
 import LoginForm from "./components/LoginForm"
 import Notification from "./components/Notification"
@@ -21,6 +21,7 @@ import { setNotification } from "./reducers/notificationReducer"
 import { initializeUsers } from "./reducers/usersReducer"
 import Blog from "./components/Blog"
 import NavigationBar from "./components/NavigationBar"
+import { Button } from "react-bootstrap"
 
 const App = () => {
   const dispatch = useDispatch()
@@ -144,10 +145,28 @@ const App = () => {
       <Error />
       <div>
         <h1>Blog App</h1>
-        <button onClick={handleLogOut}>Log out</button>
+        <Button onClick={handleLogOut}>Log out</Button>
       </div>
       <Routes>
-        <Route path="/blogs" element={<BlogList />} />
+        <Route
+          path="/blogs"
+          element={
+            <div>
+              <div style={hideWhenVisible}>
+                <Button onClick={() => setCreateBlogVisible(true)}>
+                  Create Blog
+                </Button>
+              </div>
+              <div style={showWhenVisible}>
+                <CreateBlogForm createBlog={handleCreateBlog} />
+                <Button onClick={() => setCreateBlogVisible(false)}>
+                  Cancel
+                </Button>
+              </div>
+              <BlogList />
+            </div>
+          }
+        />
         <Route
           path="/blogs/:id"
           element={
@@ -161,25 +180,7 @@ const App = () => {
         />
         <Route path="/users" element={<UserList />} />
         <Route path="/users/:id" element={<User />} />
-        <Route
-          path="/"
-          element={
-            <div>
-              <div style={hideWhenVisible}>
-                <button onClick={() => setCreateBlogVisible(true)}>
-                  Create Blog
-                </button>
-              </div>
-              <div style={showWhenVisible}>
-                <CreateBlogForm createBlog={handleCreateBlog} />
-                <button onClick={() => setCreateBlogVisible(false)}>
-                  Cancel
-                </button>
-              </div>
-              <BlogList />
-            </div>
-          }
-        />
+        <Route path="/" element={<div></div>} />
       </Routes>
     </div>
   )
